@@ -5,11 +5,12 @@
   "scripts": {
     "dev:server": "npm --prefix server run dev",
     "dev:client": "npm --prefix client run dev",
-    "build": "npm --prefix client run build",
-    "install:all": "npm --prefix server install && npm --prefix client install"
+    "build": "cd client && npm install && npm run build"
   },
-  "keywords": ["telegram", "mini-app", "ads", "react", "nodejs", "mongodb"],
-  "author": "",
-  "license": "ISC"
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "mongoose": "^8.7.0"
+  }
 }
-

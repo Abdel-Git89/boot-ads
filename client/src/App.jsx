@@ -10,8 +10,8 @@ import WalletPage from './pages/WalletPage';
 // سياق التطبيق لمشاركة بيانات المستخدم وAPI
 export const AppContext = createContext(null);
 
-// إعداد عنوان API
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// إعداد عنوان API: في الإنتاج على Vercel يتم استخدام نفس النطاق، وفي التطوير المحلي http://localhost:5000
+const API_URL = import.meta.env.VITE_API_URL !== undefined ? import.meta.env.VITE_API_URL : (import.meta.env.DEV ? 'http://localhost:5000' : '');
 
 // إنشاء نسخة axios مع الإعدادات الافتراضية
 const api = axios.create({
