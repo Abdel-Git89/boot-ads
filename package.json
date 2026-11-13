@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "Telegram Mini App for Ads & Task Marketplace",
   "scripts": {
+    "build": "npm --prefix client run build",
     "dev:server": "npm --prefix server run dev",
-    "dev:client": "npm --prefix client run dev",
-    "build": "cd client && npm install && npm run build"
+    "dev:client": "npm --prefix client run dev"
   },
   "dependencies": {
     "cors": "^2.8.5",
