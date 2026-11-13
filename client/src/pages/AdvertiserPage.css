@@ -1,0 +1,97 @@
+/* أنماط صفحة المعلن */
+.advertiser-page {
+  padding-bottom: var(--spacing-md);
+}
+
+.form-section-title {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+  color: var(--tg-theme-text-color);
+}
+
+.form-row {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.form-group-half {
+  flex: 1;
+}
+
+/* بطاقة الوصول المقيّد */
+.access-denied {
+  text-align: center;
+  padding: var(--spacing-xl);
+}
+
+.access-denied-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: var(--spacing-md);
+}
+
+.access-denied h2 {
+  font-size: 18px;
+  margin-bottom: var(--spacing-sm);
+}
+
+.access-denied p {
+  font-size: 14px;
+  color: var(--tg-theme-hint-color);
+  margin-bottom: var(--spacing-lg);
+}
+
+/* قسم إعلاناتي */
+.my-ads-section {
+  margin-top: var(--spacing-lg);
+}
+
+.my-ad-card {
+  transition: transform 0.15s ease;
+}
+
+.my-ad-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.my-ad-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.my-ad-description {
+  font-size: 13px;
+  color: var(--tg-theme-hint-color);
+  margin-bottom: var(--spacing-md);
+}
+
+.my-ad-stats {
+  display: flex;
+  gap: var(--spacing-md);
+  padding-top: var(--spacing-sm);
+  border-top: 0.5px solid var(--tg-theme-secondary-bg-color);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: var(--tg-theme-hint-color);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.stat-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--tg-theme-text-color);
+}

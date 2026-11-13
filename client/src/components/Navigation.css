@@ -1,0 +1,46 @@
+/* شريط التنقل السفلي */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-color: var(--tg-theme-bg-color);
+  border-top: 0.5px solid rgba(0, 0, 0, 0.08);
+  padding: 6px 0;
+  padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+  z-index: 100;
+  box-shadow: 0 -1px 8px rgba(0, 0, 0, 0.04);
+}
+
+.nav-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px 16px;
+  text-decoration: none;
+  color: var(--tg-theme-hint-color);
+  transition: color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: var(--radius-sm);
+  min-width: 64px;
+}
+
+.nav-tab-active {
+  color: var(--tg-theme-button-color);
+}
+
+.nav-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.nav-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}

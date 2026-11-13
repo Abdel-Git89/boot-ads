@@ -1,0 +1,181 @@
+/* أنماط صفحة المحفظة */
+.wallet-page {
+  padding-bottom: var(--spacing-md);
+}
+
+/* بطاقة الرصيد */
+.balance-card {
+  background: linear-gradient(135deg, var(--tg-theme-button-color), #1a6cb5);
+  color: var(--tg-theme-button-text-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+  box-shadow: 0 4px 16px rgba(36, 129, 204, 0.25);
+}
+
+.balance-card-label {
+  font-size: 13px;
+  opacity: 0.85;
+  display: block;
+  margin-bottom: var(--spacing-xs);
+}
+
+.balance-card-amount {
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  display: block;
+  margin-bottom: var(--spacing-md);
+}
+
+.balance-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: center;
+}
+
+.balance-action-btn {
+  padding: 8px 20px;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--tg-theme-button-text-color);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.balance-action-btn:active {
+  transform: scale(0.95);
+}
+
+.balance-action-btn.active {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* نموذج */
+.form-card {
+  margin-bottom: var(--spacing-lg);
+}
+
+.form-section-title {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+}
+
+.form-hint {
+  display: block;
+  font-size: 11px;
+  color: var(--tg-theme-hint-color);
+  margin-top: var(--spacing-xs);
+}
+
+/* خيارات بوابات الدفع */
+.gateway-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
+}
+
+.gateway-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px;
+  border: 1.5px solid var(--tg-theme-secondary-bg-color);
+  border-radius: var(--radius-sm);
+  background: var(--tg-theme-bg-color);
+  color: var(--tg-theme-text-color);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.gateway-btn:active {
+  transform: scale(0.97);
+}
+
+.gateway-btn-active {
+  border-color: var(--tg-theme-button-color);
+  background-color: rgba(36, 129, 204, 0.06);
+  color: var(--tg-theme-button-color);
+}
+
+/* قسم المعاملات */
+.transactions-section {
+  margin-top: var(--spacing-sm);
+}
+
+.clickable-header {
+  cursor: pointer;
+}
+
+.transactions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* عنصر معاملة */
+.transaction-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: 12px var(--spacing-md);
+}
+
+.tx-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: var(--tg-theme-secondary-bg-color);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.tx-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.tx-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tx-date {
+  font-size: 11px;
+  color: var(--tg-theme-hint-color);
+}
+
+.tx-gateway {
+  font-size: 10px;
+  color: var(--tg-theme-hint-color);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.tx-amount {
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ألوان المعاملات */
+.tx-reward { color: var(--color-reward); }
+.tx-deposit { color: var(--color-deposit); }
+.tx-withdrawal { color: var(--color-withdrawal); }
+.tx-ad-spend { color: var(--color-ad-spend); }
