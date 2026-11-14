@@ -19,6 +19,11 @@ const completionSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  // إجابة استطلاع الرأي (إن وجد)
+  surveyAnswer: {
+    type: String,
+    default: null,
+  },
   // تاريخ الإكمال
   completedAt: {
     type: Date,

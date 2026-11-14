@@ -4,16 +4,17 @@ import { AppContext } from '../App';
 import './TasksPage.css';
 
 /**
- * صفحة المهام - عرض الإعلانات المتاحة للمستخدم
- * يمكن للمستخدم تنفيذ المهام وكسب المكافآت
+ * صفحة المهام والاستطلاعات - عرض المهام المتاحة للمستخدم
+ * يمكن للمستخدم تنفيذ المهام والمشاركة في الاستطلاعات لكسب المكافآت
  */
 function TasksPage() {
   const { user, api, showToast, fetchUser } = useContext(AppContext);
   const [ads, setAds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [completingId, setCompletingId] = useState(null);
+  const [surveyAnswers, setSurveyAnswers] = useState({});
 
-  // جلب قائمة الإعلانات
+  // جلب قائمة الإعلانات والمهام
   const fetchAds = useCallback(async () => {
     try {
       const res = await api.get('/api/ads');
@@ -30,42 +31,58 @@ function TasksPage() {
     fetchAds();
   }, [fetchAds]);
 
-  // تنفيذ مهمة إعلان
+  // تنفيذ مهمة أو الإجابة على استطلاع
   const handleComplete = async (ad) => {
     if (completingId) return;
+
+    // إذا كانت المهمة استطلاع رأي، التأكد من اختيار إجابة
+    if (ad.type === 'survey' && !surveyAnswers[ad._id]) {
+      showToast('يرجى اختيار إجابة من الاستطلاع أولاً 📊', 'error');
+      return;
+    }
+
     setCompletingId(ad._id);
 
     try {
-      // فتح الرابط حسب نوع الإعلان
-      if (ad.type === 'link_click' || ad.type === 'channel_sub') {
-        try {
-          WebApp.openLink(ad.targetUrl);
-        } catch {
-          window.open(ad.targetUrl, '_blank');
+      // فتح الرابط الخارجي (قناة، موقع، أو بوت)
+      if (ad.type === 'link_click' || ad.type === 'channel_sub' || ad.type === 'bot_start') {
+        if (ad.targetUrl) {
+          try {
+            WebApp.openLink(ad.targetUrl);
+          } catch {
+            window.open(ad.targetUrl, '_blank');
+          }
         }
       }
 
-      // إرسال طلب إتمام المهمة
-      await api.post(`/api/ads/${ad._id}/complete`);
-      showToast(`🎉 حصلت على ${ad.rewardPerUser} نقطة!`, 'success');
+      // إرسال طلب إتمام المهمة مع الإجابة
+      await api.post(`/api/ads/${ad._id}/complete`, {
+        surveyAnswer: surveyAnswers[ad._id] || undefined,
+      });
 
-      // تحديث القائمة وبيانات المستخدم
+      showToast(`🎉 مبروك! حصلت على +${ad.rewardPerUser} نقطة!`, 'success');
+
+      // تحديث القائمة والرصيد
       await Promise.all([fetchAds(), fetchUser()]);
     } catch (err) {
-      const msg = err.response?.data?.message || 'فشل تنفيذ المهمة';
+      const msg = err.response?.data?.error || err.response?.data?.message || 'فشل تنفيذ المهمة';
       showToast(msg, 'error');
     } finally {
       setCompletingId(null);
     }
   };
 
-  // أيقونة نوع الإعلان
+  // أيقونة وتسمية نوع الإعلان
   const getTypeInfo = (type) => {
     switch (type) {
+      case 'survey':
+        return { icon: '📊', label: 'استطلاع رأي', className: 'badge-survey' };
       case 'channel_sub':
         return { icon: '📢', label: 'اشتراك قناة', className: 'badge-channel' };
       case 'link_click':
         return { icon: '🔗', label: 'زيارة رابط', className: 'badge-link' };
+      case 'bot_start':
+        return { icon: '🤖', label: 'تجربة بوت', className: 'badge-bot' };
       case 'view':
         return { icon: '👁️', label: 'مشاهدة', className: 'badge-view' };
       default:
@@ -86,8 +103,8 @@ function TasksPage() {
       {/* رأس الصفحة مع الرصيد */}
       <div className="tasks-header">
         <div>
-          <h1 className="page-title">المهام</h1>
-          <p className="page-subtitle">أكمل المهام واكسب المكافآت</p>
+          <h1 className="page-title">المهام والاستطلاعات 🚀</h1>
+          <p className="page-subtitle">أكمل المهام وشارك في الاستطلاعات واكسب مكافآت فورية!</p>
         </div>
         <div className="balance-badge">
           <span className="balance-label">رصيدك</span>
@@ -95,11 +112,11 @@ function TasksPage() {
         </div>
       </div>
 
-      {/* قائمة الإعلانات */}
+      {/* قائمة المهام والاستطلاعات */}
       {ads.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon">📭</div>
-          <p className="empty-state-text">لا توجد مهام متاحة حالياً</p>
+          <p className="empty-state-text">لا توجد مهام أو استطلاعات متاحة حالياً</p>
         </div>
       ) : (
         <div className="ads-list">
@@ -122,6 +139,28 @@ function TasksPage() {
                 <h3 className="ad-title">{ad.title}</h3>
                 <p className="ad-description">{ad.description}</p>
 
+                {/* جزء استطلاع الرأي التفاعلي */}
+                {ad.type === 'survey' && ad.surveyData?.question && !isCompleted && (
+                  <div className="survey-container">
+                    <h4 className="survey-question">❓ {ad.surveyData.question}</h4>
+                    <div className="survey-options">
+                      {ad.surveyData.options?.map((opt, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          className={`survey-opt-btn ${surveyAnswers[ad._id] === opt ? 'survey-opt-selected' : ''}`}
+                          onClick={() => setSurveyAnswers((prev) => ({ ...prev, [ad._id]: opt }))}
+                        >
+                          <span className="survey-opt-radio">
+                            {surveyAnswers[ad._id] === opt ? '🔘' : '⚪'}
+                          </span>
+                          <span className="survey-opt-text">{opt}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {ad.advertiserId?.username && (
                   <p className="ad-advertiser">بواسطة @{ad.advertiserId.username}</p>
                 )}
@@ -140,10 +179,12 @@ function TasksPage() {
                       {isCompleting ? (
                         <>
                           <span className="spinner spinner-sm"></span>
-                          جاري التنفيذ...
+                          جاري التحقق...
                         </>
+                      ) : ad.type === 'survey' ? (
+                        '🗳️ إرسال الإجابة وكسب المكافأة'
                       ) : (
-                        'تنفيذ'
+                        '⚡ تنفيذ المهمة'
                       )}
                     </button>
                   )}

@@ -19,16 +19,21 @@ const adSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    // الرابط المستهدف (قناة أو موقع)
+    // الرابط المستهدف (قناة أو موقع أو فارغ في حالة الاستطلاع)
     targetUrl: {
       type: String,
-      required: true,
+      default: '',
     },
-    // نوع الإعلان: اشتراك بقناة، نقر على رابط، أو مشاهدة
+    // نوع الإعلان: اشتراك بقناة، نقر على رابط، مشاهدة، استطلاع رأي، أو تجربة بوت
     type: {
       type: String,
-      enum: ['channel_sub', 'link_click', 'view'],
+      enum: ['channel_sub', 'link_click', 'view', 'survey', 'bot_start'],
       required: true,
+    },
+    // بيانات استطلاع الرأي (في حال كان نوع المهمة survey)
+    surveyData: {
+      question: { type: String, default: '' },
+      options: [{ type: String }],
     },
     // المكافأة لكل مستخدم يكمل المهمة
     rewardPerUser: {

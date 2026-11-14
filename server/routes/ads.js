@@ -54,16 +54,28 @@ router.post('/', async (req, res) => {
       return res.status(403).json({ error: 'يجب أن تكون معلناً لإنشاء إعلان' });
     }
 
-    const { title, description, targetUrl, type, rewardPerUser, budget } = req.body;
+    const { title, description, targetUrl, type, rewardPerUser, budget, surveyData } = req.body;
 
     // التحقق من وجود جميع الحقول المطلوبة
-    if (!title || !description || !targetUrl || !type || !rewardPerUser || !budget) {
-      return res.status(400).json({ error: 'جميع الحقول مطلوبة' });
+    if (!title || !description || !type || !rewardPerUser || !budget) {
+      return res.status(400).json({ error: 'الحقول الأساسية مطلوبة' });
     }
 
     // التحقق من صحة نوع الإعلان
-    if (!['channel_sub', 'link_click', 'view'].includes(type)) {
+    if (!['channel_sub', 'link_click', 'view', 'survey', 'bot_start'].includes(type)) {
       return res.status(400).json({ error: 'نوع الإعلان غير صالح' });
+    }
+
+    // التحقق من الرابط المستهدف (إذا لم يكن استطلاع رأي)
+    if (type !== 'survey' && !targetUrl) {
+      return res.status(400).json({ error: 'الرابط المستهدف مطلوب' });
+    }
+
+    // التحقق من بيانات الاستطلاع
+    if (type === 'survey') {
+      if (!surveyData?.question?.trim() || !Array.isArray(surveyData?.options) || surveyData.options.filter(o => o.trim()).length < 2) {
+        return res.status(400).json({ error: 'يتطلب الاستطلاع سؤالاً وخيارين على الأقل' });
+      }
     }
 
     // التحقق من أن القيم المالية موجبة
@@ -86,11 +98,15 @@ router.post('/', async (req, res) => {
       advertiserId: req.user._id,
       title,
       description,
-      targetUrl,
+      targetUrl: targetUrl || '',
       type,
       rewardPerUser,
       budget,
       remainingBudget: budget,
+      surveyData: type === 'survey' ? {
+        question: surveyData.question.trim(),
+        options: surveyData.options.filter(o => o.trim()),
+      } : undefined,
     });
 
     // تسجيل معاملة الإنفاق الإعلاني
@@ -159,6 +175,15 @@ router.post('/:id/complete', async (req, res) => {
       return res.status(400).json({ error: 'لقد أكملت هذا الإعلان مسبقاً' });
     }
 
+    const { surveyAnswer } = req.body;
+
+    // التحقق من الإجابة في حال كان نوع الإعلان استطلاع رأي
+    if (ad.type === 'survey' && !surveyAnswer) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ error: 'يرجى اختيار إجابة من الاستطلاع لإكمال المهمة' });
+    }
+
     // إنشاء سجل الإكمال
     await Completion.create(
       [
@@ -166,6 +191,7 @@ router.post('/:id/complete', async (req, res) => {
           userId: req.user._id,
           adId,
           earnedAmount: ad.rewardPerUser,
+          surveyAnswer: surveyAnswer || null,
         },
       ],
       { session }
