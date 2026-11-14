@@ -13,12 +13,17 @@ const authMiddleware = require('./middleware/auth');
 const adsRoutes = require('./routes/ads');
 const walletRoutes = require('./routes/wallet');
 const usersRoutes = require('./routes/users');
+const hotelsRoutes = require('./routes/hotels');
+const botWebhookRoutes = require('./routes/botWebhook');
 
 const app = express();
 
 // إعداد الوسائط الأساسية
 app.use(cors({ origin: '*' }));
 app.use(express.json());
+
+// مسارات روبوت تيليجرام المباشر (Webhook - بدون وسيط مصادقة التطبيق)
+app.use('/api/bot', botWebhookRoutes);
 
 // الاتصال بقاعدة البيانات مع التخزين المؤقت للبيئات الخادمة (Serverless)
 let isConnected = false;
@@ -46,6 +51,7 @@ app.use(async (req, res, next) => {
 app.use('/api', authMiddleware);
 
 // تسجيل المسارات
+app.use('/api/hotels', hotelsRoutes);
 app.use('/api/ads', adsRoutes);
 app.use('/api/wallet', walletRoutes);
 app.use('/api/users', usersRoutes);

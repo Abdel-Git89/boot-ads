@@ -1,0 +1,235 @@
+.hotel-search-page {
+  padding-bottom: var(--spacing-lg);
+}
+
+.travel-hero {
+  background: linear-gradient(135deg, #0b1e36, #1a365d);
+  color: #fff;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg) var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  box-shadow: 0 4px 16px rgba(11, 30, 54, 0.3);
+}
+
+.travel-badge {
+  display: inline-block;
+  background: rgba(36, 129, 204, 0.25);
+  color: #63b3ed;
+  border: 1px solid rgba(99, 179, 237, 0.4);
+  padding: 3px 12px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.travel-title {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  letter-spacing: -0.5px;
+}
+
+.travel-subtitle {
+  font-size: 12.5px;
+  opacity: 0.85;
+  margin-bottom: var(--spacing-md);
+  line-height: 1.4;
+}
+
+.travel-search-form {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.travel-search-input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+}
+
+.travel-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.travel-search-input:focus {
+  border-color: #63b3ed;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.travel-search-btn {
+  padding: 10px 16px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.quick-cities-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.city-pill {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.city-pill:hover,
+.city-pill-active {
+  background: var(--tg-theme-button-color, #2481cc);
+  border-color: var(--tg-theme-button-color, #2481cc);
+  font-weight: 600;
+}
+
+/* شريط نصيحة الذكاء الاصطناعي */
+.ai-advice-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(175, 82, 222, 0.1);
+  border: 1px solid rgba(175, 82, 222, 0.25);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin-bottom: var(--spacing-md);
+}
+
+.ai-advice-icon {
+  font-size: 22px;
+}
+
+.ai-advice-text {
+  font-size: 12.5px;
+  color: var(--tg-theme-text-color);
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+/* بطاقة الفندق */
+.hotel-deal-card {
+  padding: 0;
+  overflow: hidden;
+  margin-bottom: var(--spacing-md);
+}
+
+.hotel-img-wrapper {
+  position: relative;
+  height: 160px;
+  overflow: hidden;
+}
+
+.hotel-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hotel-tag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  backdrop-filter: blur(4px);
+}
+
+.hotel-rating-badge {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: #34c759;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.hotel-content {
+  padding: var(--spacing-md);
+}
+
+.hotel-name {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 2px;
+  color: var(--tg-theme-text-color);
+}
+
+.hotel-location {
+  font-size: 12px;
+  color: var(--tg-theme-hint-color);
+  margin-bottom: var(--spacing-md);
+}
+
+/* جدول مقارنة الأسعار */
+.price-comparison-box {
+  background: var(--tg-theme-secondary-bg-color, #f4f5f7);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  margin-bottom: var(--spacing-sm);
+}
+
+.provider-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  font-size: 13px;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.06);
+}
+
+.provider-row:last-child {
+  border-bottom: none;
+}
+
+.provider-best {
+  font-weight: 700;
+  color: #34c759;
+  font-size: 14px;
+}
+
+.provider-price-strike {
+  text-decoration: line-through;
+  color: var(--tg-theme-hint-color);
+  font-size: 12px;
+}
+
+.hotel-ai-tip {
+  background: rgba(0, 122, 255, 0.06);
+  border-left: 3px solid #007aff;
+  padding: 8px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--tg-theme-text-color);
+  line-height: 1.4;
+  margin-bottom: var(--spacing-md);
+}
+
+.hotel-actions-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.btn-book-best {
+  background: linear-gradient(135deg, #34c759, #28a745);
+  font-weight: 700;
+}

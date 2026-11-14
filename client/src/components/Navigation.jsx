@@ -12,7 +12,8 @@ function Navigation() {
   const location = useLocation();
 
   const tabs = [
-    { path: '/', label: 'المهام', icon: '📋' },
+    { path: '/', label: 'فنادق وعروض', icon: '🏨' },
+    { path: '/tasks', label: 'المهام', icon: '📋' },
     { path: '/vip', label: 'VIP', icon: '👑' },
     { path: '/friends', label: 'الأصدقاء', icon: '👥' },
     { path: '/advertiser', label: 'المعلن', icon: '📢' },
