@@ -31,7 +31,7 @@ async function connectDB() {
   if (isConnected && mongoose.connection.readyState === 1) {
     return;
   }
-  const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/boot-ads';
+  const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://hshhsyassin_db_user:4DZ3SA2cQVCrAroL@boot-ads.zlzuna1.mongodb.net/boot-ads?retryWrites=true&w=majority';
   await mongoose.connect(MONGODB_URI);
   isConnected = true;
 }

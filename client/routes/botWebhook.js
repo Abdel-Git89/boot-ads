@@ -1,9 +1,18 @@
 const express = require('express');
-const axios = require('axios');
 const router = express.Router();
 
-const BOT_TOKEN = process.env.BOT_TOKEN;
+const BOT_TOKEN = process.env.BOT_TOKEN || '9007518006:AAF4hkkd7BjA5dl6yCB6DM85WP86zaAQUPI';
 const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
+
+// دالة مساعدة لإرسال الطلبات إلى تيليجرام باستخدام fetch المدمج في Node.js
+async function tgPost(method, bodyData) {
+  const resp = await fetch(`${TELEGRAM_API}/${method}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(bodyData),
+  });
+  return resp.json();
+}
 
 /**
  * POST /api/bot/webhook
@@ -36,7 +45,7 @@ router.post('/webhook', async (req, res) => {
 
 👇 أو اضغط على الزر أدناه لفتح التطبيق المتكامل:`;
 
-      await axios.post(`${TELEGRAM_API}/sendMessage`, {
+      await tgPost('sendMessage', {
         chat_id: chatId,
         text: welcomeMessage,
         parse_mode: 'Markdown',
@@ -86,7 +95,7 @@ router.post('/webhook', async (req, res) => {
     const bookingUrl = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(destination)}&aid=bootads`;
     const agodaUrl = `https://www.agoda.com/search?city=${encodeURIComponent(destination)}`;
 
-    await axios.post(`${TELEGRAM_API}/sendMessage`, {
+    await tgPost('sendMessage', {
       chat_id: chatId,
       text: hotelSummary,
       parse_mode: 'Markdown',
@@ -106,7 +115,7 @@ router.post('/webhook', async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Webhook error:', error.response?.data || error.message);
+    console.error('Webhook error:', error.message);
   }
 });
 
@@ -117,10 +126,8 @@ router.post('/webhook', async (req, res) => {
 router.get('/set-webhook', async (req, res) => {
   try {
     const webhookUrl = 'https://boot-ads-anws.vercel.app/api/bot/webhook';
-    const resp = await axios.post(`${TELEGRAM_API}/setWebhook`, {
-      url: webhookUrl,
-    });
-    res.json(resp.data);
+    const data = await tgPost('setWebhook', { url: webhookUrl });
+    res.json(data);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -46,10 +46,10 @@ const authMiddleware = async (req, res, next) => {
       .map(([key, value]) => `${key}=${value}`)
       .join('\n');
 
-    // إنشاء المفتاح السري باستخدام توكن البوت
+    const botToken = process.env.BOT_TOKEN || '9007518006:AAF4hkkd7BjA5dl6yCB6DM85WP86zaAQUPI';
     const secretKey = crypto
       .createHmac('sha256', 'WebAppData')
-      .update(process.env.BOT_TOKEN)
+      .update(botToken)
       .digest();
 
     // حساب HMAC-SHA256 لسلسلة التحقق باستخدام المفتاح السري

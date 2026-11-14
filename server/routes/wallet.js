@@ -139,31 +139,35 @@ router.post('/stars-invoice', async (req, res) => {
       return res.status(400).json({ error: 'يرجى إدخال عدد صحيح من النجوم' });
     }
 
-    const BOT_TOKEN = process.env.BOT_TOKEN;
+    const BOT_TOKEN = process.env.BOT_TOKEN || '9007518006:AAF4hkkd7BjA5dl6yCB6DM85WP86zaAQUPI';
     if (!BOT_TOKEN) {
       return res.status(500).json({ error: 'توكن البوت غير مهيأ' });
     }
 
     // طلب إنشاء رابط الفاتورة من تيليجرام
-    const axios = require('axios');
-    const response = await axios.post(
+    const response = await fetch(
       `https://api.telegram.org/bot${BOT_TOKEN}/createInvoiceLink`,
       {
-        title: 'شحن رصيد الإعلانات ⭐',
-        description: `شحن ${stars} نقطة في منصة Boot-Ads عبر نجوم تيليجرام`,
-        payload: `stars_dep_${req.user._id}_${stars}_${Date.now()}`,
-        currency: 'XTR', // العملة الرسمية لنجوم تيليجرام
-        prices: [{ label: `${stars} نجوم`, amount: stars }],
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'شحن رصيد الإعلانات ⭐',
+          description: `شحن ${stars} نقطة في منصة Boot-Ads عبر نجوم تيليجرام`,
+          payload: `stars_dep_${req.user._id}_${stars}_${Date.now()}`,
+          currency: 'XTR', // العملة الرسمية لنجوم تيليجرام
+          prices: [{ label: `${stars} نجوم`, amount: stars }],
+        }),
       }
     );
+    const data = await response.json();
 
-    if (response.data && response.data.ok) {
-      res.json({ invoiceLink: response.data.result });
+    if (data && data.ok) {
+      res.json({ invoiceLink: data.result });
     } else {
       res.status(400).json({ error: 'فشل إنشاء فاتورة النجوم من تيليجرام' });
     }
   } catch (error) {
-    console.error('Stars invoice error:', error.response?.data || error.message);
+    console.error('Stars invoice error:', error.message);
     res.status(500).json({ error: 'تعذر إنشاء فاتورة النجوم' });
   }
 });

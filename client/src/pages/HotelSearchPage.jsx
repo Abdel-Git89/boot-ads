@@ -177,3 +177,4 @@ function HotelSearchPage() {
 }
 
 export default HotelSearchPage;
+
