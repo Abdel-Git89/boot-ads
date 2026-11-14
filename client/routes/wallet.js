@@ -98,8 +98,8 @@ router.post('/withdraw', async (req, res) => {
       return res.status(400).json({ error: 'رصيدك غير كافٍ للسحب' });
     }
 
-    // رسوم السحب للمنصة (5%)
-    const fee = Number((amount * 0.05).toFixed(2));
+    // رسوم السحب: 0% مجاناً لأعضاء VIP المميزين، و5% للمستخدمين العاديين
+    const fee = req.user.isVip ? 0 : Number((amount * 0.05).toFixed(2));
     const netWithdrawAmount = Number((amount - fee).toFixed(2));
 
     // خصم المبلغ الإجمالي من رصيد المستخدم فوراً

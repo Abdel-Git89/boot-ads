@@ -7,6 +7,7 @@ import TasksPage from './pages/TasksPage';
 import AdvertiserPage from './pages/AdvertiserPage';
 import WalletPage from './pages/WalletPage';
 import FriendsPage from './pages/FriendsPage';
+import VipPage from './pages/VipPage';
 
 // سياق التطبيق لمشاركة بيانات المستخدم وAPI
 export const AppContext = createContext(null);
@@ -101,6 +102,7 @@ function App() {
         <div className="content">
           <Routes>
             <Route path="/" element={<TasksPage />} />
+            <Route path="/vip" element={<VipPage />} />
             <Route path="/friends" element={<FriendsPage />} />
             <Route path="/advertiser" element={<AdvertiserPage />} />
             <Route path="/wallet" element={<WalletPage />} />

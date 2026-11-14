@@ -45,6 +45,20 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    // العضوية المميزة VIP / Abonnement
+    isVip: {
+      type: Boolean,
+      default: false,
+    },
+    vipExpiresAt: {
+      type: Date,
+      default: null,
+    },
+    vipPlan: {
+      type: String,
+      enum: ['none', 'monthly', 'lifetime'],
+      default: 'none',
+    },
   },
   { timestamps: true }
 );

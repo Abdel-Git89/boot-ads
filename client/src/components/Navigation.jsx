@@ -13,6 +13,7 @@ function Navigation() {
 
   const tabs = [
     { path: '/', label: 'المهام', icon: '📋' },
+    { path: '/vip', label: 'VIP', icon: '👑' },
     { path: '/friends', label: 'الأصدقاء', icon: '👥' },
     { path: '/advertiser', label: 'المعلن', icon: '📢' },
     { path: '/wallet', label: 'المحفظة', icon: '💰' },

@@ -11,6 +11,30 @@ function AdvertiserPage() {
   const [ads, setAds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [packageChannelUrl, setPackageChannelUrl] = useState('');
+  const [buyingPackage, setBuyingPackage] = useState(false);
+
+  // شراء باقة نمو جاهزة بنقرة واحدة
+  const handleBuyPackage = async (packageId) => {
+    if (!packageChannelUrl.trim()) {
+      showToast('يرجى إدخال رابط قناتك أو مجموعتك أولاً', 'error');
+      return;
+    }
+    setBuyingPackage(true);
+    try {
+      const res = await api.post('/api/ads/packages', {
+        packageId,
+        channelUrl: packageChannelUrl.trim(),
+      });
+      showToast(res.data.message || 'تم شراء الباقة ونشر حملتك بنجاح! 🚀', 'success');
+      setPackageChannelUrl('');
+      await Promise.all([fetchMyAds(), fetchUser()]);
+    } catch (err) {
+      showToast(err.response?.data?.error || 'فشل شراء الباقة', 'error');
+    } finally {
+      setBuyingPackage(false);
+    }
+  };
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -200,7 +224,71 @@ function AdvertiserPage() {
       <h1 className="page-title">لوحة المعلن 📢</h1>
       <p className="page-subtitle">أنشئ مهاماً واستطلاعات رأي وانشرها لآلاف المستخدمين!</p>
 
-      {/* نموذج إنشاء مهمة أو استطلاع */}
+      {/* باقات النمو السريعة الجاهزة */}
+      <div className="card packages-card">
+        <h2 className="form-section-title">🚀 باقات النمو السريع الجاهزة</h2>
+        <p className="packages-subtitle">
+          احصل على أعضاء حقيقيين لقناتك بنقرة واحدة دون الحاجة لضبط الإعدادات يدوياً!
+        </p>
+
+        <div className="form-group" style={{ marginBottom: '16px' }}>
+          <label className="form-label">رابط قناتك أو مجموعتك</label>
+          <input
+            type="url"
+            className="form-input"
+            placeholder="https://t.me/your_channel"
+            value={packageChannelUrl}
+            onChange={(e) => setPackageChannelUrl(e.target.value)}
+          />
+        </div>
+
+        <div className="growth-packages-grid">
+          <div className="package-card">
+            <span className="pack-emoji">🚀</span>
+            <h3 className="pack-title">باقة البداية</h3>
+            <div className="pack-members">+100 عضو</div>
+            <div className="pack-cost">10.00 نقطة</div>
+            <button
+              className="btn btn-primary btn-block btn-sm"
+              onClick={() => handleBuyPackage('starter')}
+              disabled={buyingPackage}
+            >
+              شراء الباقة
+            </button>
+          </div>
+
+          <div className="package-card package-featured">
+            <div className="pack-featured-badge">الأكثر طلباً 🔥</div>
+            <span className="pack-emoji">🔥</span>
+            <h3 className="pack-title">النمو السريع</h3>
+            <div className="pack-members">+500 عضو</div>
+            <div className="pack-cost">40.00 نقطة</div>
+            <button
+              className="btn btn-primary btn-block btn-sm"
+              onClick={() => handleBuyPackage('pro')}
+              disabled={buyingPackage}
+            >
+              شراء الباقة
+            </button>
+          </div>
+
+          <div className="package-card">
+            <span className="pack-emoji">👑</span>
+            <h3 className="pack-title">انفجار فيروسي</h3>
+            <div className="pack-members">+1500 عضو</div>
+            <div className="pack-cost">100.00 نقطة</div>
+            <button
+              className="btn btn-primary btn-block btn-sm"
+              onClick={() => handleBuyPackage('viral')}
+              disabled={buyingPackage}
+            >
+              شراء الباقة
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* نموذج إنشاء مهمة أو استطلاع يدوي */}
       <div className="card">
         <h2 className="form-section-title">إنشاء مهمة أو استطلاع جديد</h2>
         <form onSubmit={handleSubmit}>

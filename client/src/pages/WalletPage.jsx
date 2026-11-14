@@ -15,6 +15,7 @@ function WalletPage() {
   const [depositForm, setDepositForm] = useState({ amount: '', gateway: 'paypal' });
   const [withdrawForm, setWithdrawForm] = useState({ amount: '', gateway: 'paypal' });
   const [submitting, setSubmitting] = useState(false);
+  const [showProofModal, setShowProofModal] = useState(false);
 
   // جلب بيانات المحفظة
   const fetchWallet = useCallback(async () => {
@@ -173,6 +174,13 @@ function WalletPage() {
           >
             📤 سحب
           </button>
+          <button
+            className="balance-action-btn"
+            style={{ background: 'rgba(255, 215, 0, 0.2)', color: '#ffd700' }}
+            onClick={() => setShowProofModal(true)}
+          >
+            🎬 إثبات الدفع
+          </button>
         </div>
       </div>
 
@@ -307,6 +315,65 @@ function WalletPage() {
           </div>
         )}
       </div>
+
+      {/* نافذة بطاقة إثبات السحب لتصوير شاشات TikTok / Reels */}
+      {showProofModal && (
+        <div className="proof-modal-overlay fade-in" onClick={() => setShowProofModal(false)}>
+          <div className="proof-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="proof-card-preview">
+              <div className="proof-card-badge">✅ تم التحويل بنجاح</div>
+              <div className="proof-card-logo">🚀 Boot-Ads Official</div>
+              <div className="proof-card-amount">
+                +{(user?.balance && user.balance > 0 ? user.balance : 15.50).toFixed(2)} $
+              </div>
+              <p className="proof-card-user">المستلم: @{user?.username || 'user'}</p>
+              <div className="proof-card-details">
+                <div className="proof-detail-row">
+                  <span>الحالة:</span>
+                  <span className="proof-status-success">مكتمل 🟢</span>
+                </div>
+                <div className="proof-detail-row">
+                  <span>الشبكة:</span>
+                  <span>Telegram Wallet / TON</span>
+                </div>
+                <div className="proof-detail-row">
+                  <span>التاريخ:</span>
+                  <span>{new Date().toLocaleDateString('ar-EG')}</span>
+                </div>
+              </div>
+              <div className="proof-card-bot">@TechBIAPBot</div>
+            </div>
+
+            <p style={{ fontSize: '12px', color: 'var(--tg-theme-hint-color)', textAlign: 'center', margin: '12px 0 8px' }}>
+              📸 يمكنك أخذ لقطة شاشة (Screenshot) أو تصوير الشاشة لنشرها على TikTok أو Reels لجلب آلاف الإحالات!
+            </p>
+
+            <button
+              className="btn btn-primary btn-block"
+              onClick={() => {
+                const text = encodeURIComponent(
+                  `🔥 سحبت أرباحي للتو من بوت @TechBIAPBot! تطبيق رائع لكسب المال من إكمال المهام البسيطة!`
+                );
+                const shareUrl = `https://t.me/share/url?url=https://t.me/TechBIAPBot?startapp=ref_${user?.telegramId || '123'}&text=${text}`;
+                try {
+                  WebApp.openTelegramLink(shareUrl);
+                } catch {
+                  window.open(shareUrl, '_blank');
+                }
+              }}
+            >
+              📢 مشاركة الإثبات في تيليجرام
+            </button>
+            <button
+              className="btn btn-secondary btn-block"
+              style={{ marginTop: '8px' }}
+              onClick={() => setShowProofModal(false)}
+            >
+              إغلاق
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

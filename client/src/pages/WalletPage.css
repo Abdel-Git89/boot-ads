@@ -179,3 +179,101 @@
 .tx-deposit { color: var(--color-deposit); }
 .tx-withdrawal { color: var(--color-withdrawal); }
 .tx-ad-spend { color: var(--color-ad-spend); }
+
+/* نافذة بطاقة إثبات السحب لتصوير TikTok و Reels */
+.proof-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 16px;
+}
+
+.proof-modal-content {
+  background: var(--tg-theme-bg-color, #fff);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  max-width: 340px;
+  width: 100%;
+  animation: fadeIn 0.25s ease;
+}
+
+.proof-card-preview {
+  background: linear-gradient(135deg, #0b0f19, #1a2236);
+  color: #fff;
+  border-radius: var(--radius-md);
+  padding: 24px 16px;
+  text-align: center;
+  border: 1.5px solid rgba(52, 199, 89, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+
+.proof-card-badge {
+  display: inline-block;
+  background: rgba(52, 199, 89, 0.2);
+  color: #34c759;
+  border: 1px solid #34c759;
+  padding: 3px 12px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.proof-card-logo {
+  font-size: 12px;
+  opacity: 0.7;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.proof-card-amount {
+  font-size: 34px;
+  font-weight: 900;
+  color: #34c759;
+  letter-spacing: -0.5px;
+  margin-bottom: 4px;
+}
+
+.proof-card-user {
+  font-size: 13px;
+  color: #a0aec0;
+  margin-bottom: 16px;
+}
+
+.proof-card-details {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 12px;
+}
+
+.proof-detail-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  color: #cbd5e0;
+}
+
+.proof-detail-row:last-child {
+  margin-bottom: 0;
+}
+
+.proof-status-success {
+  color: #34c759;
+  font-weight: 600;
+}
+
+.proof-card-bot {
+  font-size: 11px;
+  color: #718096;
+  font-weight: 600;
+}
