@@ -51,3 +51,4 @@ app.use('/api/wallet', walletRoutes);
 app.use('/api/users', usersRoutes);
 
 module.exports = { app, connectDB };
+

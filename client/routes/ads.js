@@ -1,0 +1,217 @@
+const express = require('express');
+const mongoose = require('mongoose');
+const Ad = require('../models/Ad');
+const Completion = require('../models/Completion');
+const User = require('../models/User');
+const Transaction = require('../models/Transaction');
+
+const router = express.Router();
+
+/**
+ * GET /api/ads
+ * جلب الإعلانات النشطة المتاحة للمستخدمين
+ * يتم أيضاً تحديد الإعلانات التي أكملها المستخدم الحالي
+ */
+router.get('/', async (req, res) => {
+  try {
+    // جلب الإعلانات النشطة التي لديها ميزانية متبقية
+    const ads = await Ad.find({
+      status: 'active',
+      remainingBudget: { $gt: 0 },
+    }).populate('advertiserId', 'username');
+
+    // جلب الإعلانات التي أكملها المستخدم الحالي
+    const completedAds = await Completion.find({ userId: req.user._id }).select('adId');
+    const completedAdIds = completedAds.map((c) => c.adId.toString());
+
+    // إضافة حقل isCompleted لكل إعلان
+    const adsWithStatus = ads.map((ad) => ({
+      ...ad.toObject(),
+      isCompleted: completedAdIds.includes(ad._id.toString()),
+    }));
+
+    res.json(adsWithStatus);
+  } catch (error) {
+    console.error('خطأ في جلب الإعلانات:', error.message);
+    res.status(500).json({ error: 'خطأ في الخادم أثناء جلب الإعلانات' });
+  }
+});
+
+/**
+ * POST /api/ads
+ * إنشاء إعلان جديد (للمعلنين والمسؤولين فقط)
+ * يتم خصم الميزانية من رصيد المعلن
+ */
+router.post('/', async (req, res) => {
+  try {
+    // التحقق من أن المستخدم معلن أو مسؤول
+    if (req.user.role !== 'advertiser' && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'يجب أن تكون معلناً لإنشاء إعلان' });
+    }
+
+    const { title, description, targetUrl, type, rewardPerUser, budget } = req.body;
+
+    // التحقق من وجود جميع الحقول المطلوبة
+    if (!title || !description || !targetUrl || !type || !rewardPerUser || !budget) {
+      return res.status(400).json({ error: 'جميع الحقول مطلوبة' });
+    }
+
+    // التحقق من صحة نوع الإعلان
+    if (!['channel_sub', 'link_click', 'view'].includes(type)) {
+      return res.status(400).json({ error: 'نوع الإعلان غير صالح' });
+    }
+
+    // التحقق من أن القيم المالية موجبة
+    if (rewardPerUser <= 0 || budget <= 0) {
+      return res.status(400).json({ error: 'يجب أن تكون المكافأة والميزانية أكبر من صفر' });
+    }
+
+    // التحقق من أن المعلن لديه رصيد كافٍ
+    if (req.user.balance < budget) {
+      return res.status(400).json({ error: 'رصيدك غير كافٍ لإنشاء هذا الإعلان' });
+    }
+
+    // خصم الميزانية من رصيد المعلن
+    await User.findByIdAndUpdate(req.user._id, {
+      $inc: { balance: -budget },
+    });
+
+    // إنشاء الإعلان
+    const ad = await Ad.create({
+      advertiserId: req.user._id,
+      title,
+      description,
+      targetUrl,
+      type,
+      rewardPerUser,
+      budget,
+      remainingBudget: budget,
+    });
+
+    // تسجيل معاملة الإنفاق الإعلاني
+    await Transaction.create({
+      userId: req.user._id,
+      amount: budget,
+      type: 'ad_spend',
+      status: 'completed',
+    });
+
+    res.status(201).json(ad);
+  } catch (error) {
+    console.error('خطأ في إنشاء الإعلان:', error.message);
+    res.status(500).json({ error: 'خطأ في الخادم أثناء إنشاء الإعلان' });
+  }
+});
+
+/**
+ * POST /api/ads/:id/complete
+ * إكمال مهمة إعلان (كسب مكافأة)
+ * يستخدم عمليات ذرية لضمان سلامة البيانات
+ */
+router.post('/:id/complete', async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const adId = req.params.id;
+
+    // التحقق من صحة معرّف الإعلان
+    if (!mongoose.Types.ObjectId.isValid(adId)) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ error: 'معرّف الإعلان غير صالح' });
+    }
+
+    // جلب الإعلان والتحقق من حالته
+    const ad = await Ad.findById(adId).session(session);
+    if (!ad) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ error: 'الإعلان غير موجود' });
+    }
+
+    if (ad.status !== 'active') {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ error: 'الإعلان غير نشط' });
+    }
+
+    if (ad.remainingBudget < ad.rewardPerUser) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ error: 'الميزانية المتبقية غير كافية' });
+    }
+
+    // التحقق من أن المستخدم لم يكمل هذا الإعلان من قبل
+    const existingCompletion = await Completion.findOne({
+      userId: req.user._id,
+      adId,
+    }).session(session);
+
+    if (existingCompletion) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ error: 'لقد أكملت هذا الإعلان مسبقاً' });
+    }
+
+    // إنشاء سجل الإكمال
+    await Completion.create(
+      [
+        {
+          userId: req.user._id,
+          adId,
+          earnedAmount: ad.rewardPerUser,
+        },
+      ],
+      { session }
+    );
+
+    // زيادة رصيد المستخدم بمقدار المكافأة
+    await User.findByIdAndUpdate(
+      req.user._id,
+      { $inc: { balance: ad.rewardPerUser } },
+      { session }
+    );
+
+    // خصم المكافأة من الميزانية المتبقية للإعلان
+    const newRemainingBudget = ad.remainingBudget - ad.rewardPerUser;
+    const updateFields = {
+      $inc: { remainingBudget: -ad.rewardPerUser },
+    };
+
+    // إذا نفدت الميزانية، تحويل حالة الإعلان إلى "مكتمل"
+    if (newRemainingBudget <= 0) {
+      updateFields.$set = { status: 'completed' };
+    }
+
+    await Ad.findByIdAndUpdate(adId, updateFields, { session });
+
+    // تسجيل معاملة المكافأة
+    await Transaction.create(
+      [
+        {
+          userId: req.user._id,
+          amount: ad.rewardPerUser,
+          type: 'reward',
+          status: 'completed',
+        },
+      ],
+      { session }
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.json({
+      message: 'تم إكمال المهمة بنجاح',
+      reward: ad.rewardPerUser,
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error('خطأ في إكمال المهمة:', error.message);
+    res.status(500).json({ error: 'خطأ في الخادم أثناء إكمال المهمة' });
+  }
+});
+
+module.exports = router;
