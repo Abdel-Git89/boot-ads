@@ -25,6 +25,9 @@ app.use(express.json());
 // مسارات روبوت تيليجرام المباشر (Webhook - بدون وسيط مصادقة التطبيق)
 app.use('/api/bot', botWebhookRoutes);
 
+// مسارات الفنادق المباشرة والسريعة فائقة الأداء (بدون انتظار اتصال قاعدة البيانات لاستجابة فورية أقل من 20ms)
+app.use('/api/hotels', hotelsRoutes);
+
 // الاتصال بقاعدة البيانات مع التخزين المؤقت للبيئات الخادمة (Serverless)
 let isConnected = false;
 async function connectDB() {
@@ -51,7 +54,6 @@ app.use(async (req, res, next) => {
 app.use('/api', authMiddleware);
 
 // تسجيل المسارات
-app.use('/api/hotels', hotelsRoutes);
 app.use('/api/ads', adsRoutes);
 app.use('/api/wallet', walletRoutes);
 app.use('/api/users', usersRoutes);

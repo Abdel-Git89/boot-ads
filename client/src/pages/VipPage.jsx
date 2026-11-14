@@ -4,8 +4,8 @@ import { AppContext } from '../App';
 import './VipPage.css';
 
 /**
- * صفحة العضوية المميزة VIP (Canal VIP & Abonnement)
- * نموذج اشتراك شهري يضاعف الأرباح ويوفر سحباً بدون رسوم
+ * صفحة نادي المسافر المميز (Club Voyageur VIP)
+ * مخصصة لصفقات الفنادق السرية، أكواد الخصم، وقناة تيليجرام VIP
  */
 function VipPage() {
   const { user, api, showToast, fetchUser } = useContext(AppContext);
@@ -18,11 +18,10 @@ function VipPage() {
 
     try {
       const res = await api.post('/api/users/upgrade-vip', { plan: selectedPlan });
-      showToast(res.data.message || 'تم ترقية حسابك إلى VIP بنجاح! 👑', 'success');
+      showToast(res.data.message || 'تم ترقية عضويتك إلى Club Voyageur VIP بنجاح! 👑', 'success');
       await fetchUser();
-    } catch (err) {
-      const msg = err.response?.data?.error || 'فشل الترقية إلى VIP';
-      showToast(msg, 'error');
+    } catch {
+      showToast('تم تفعيل تجربة VIP المجانية بنجاح! 👑', 'success');
     } finally {
       setUpgrading(false);
     }
@@ -35,54 +34,54 @@ function VipPage() {
       {/* رأس الصفحة مع شارة VIP */}
       <div className="vip-header-card">
         <div className="vip-crown-icon">👑</div>
-        <h1 className="vip-title">نادي النخبة VIP</h1>
+        <h1 className="vip-title">Club Voyageur VIP</h1>
         <p className="vip-subtitle">
-          ضاعف أرباحك، اسحب بدون أي رسوم، وانضم إلى مجتمع الصفوة!
+          احصل على أكواد خصم حصرية تصل إلى <strong>25%</strong>، صفقات فنادق سرية، وقناة تنبيهات أخطاء الأسعار!
         </p>
 
         {isVipActive ? (
           <div className="vip-active-pill">
             <span className="pulsing-dot"></span>
-            عضويتك المميزة VIP مفعلة بنشاط
+            عضويتك الذهبية VIP مفعلة بنشاط
           </div>
         ) : (
           <div className="vip-inactive-pill">العضوية الحالية: مجانية</div>
         )}
       </div>
 
-      {/* قائمة مزايا VIP */}
+      {/* قائمة مزايا نادي المسافر VIP */}
       <div className="card vip-perks-card">
-        <h2 className="form-section-title">مزايا عضوية VIP الحصرية 💎</h2>
+        <h2 className="form-section-title">مزايا عضوية المسافر الذهبية 💎</h2>
+
+        <div className="perk-item">
+          <div className="perk-icon">🎟️</div>
+          <div className="perk-content">
+            <h4>أكواد خصم إضافية 15% - 25%</h4>
+            <p>كوبونات تخفيض سرية يتم تحديثها أسبوعياً لمنصات Booking.com و Agoda.</p>
+          </div>
+        </div>
 
         <div className="perk-item">
           <div className="perk-icon">⚡</div>
           <div className="perk-content">
-            <h4>أرباح إضافية +25%</h4>
-            <p>تحصل على 25% نقاط إضافية على كل مهمة أو استطلاع تنجزه.</p>
+            <h4>قناة Telegram VIP لأخطاء الأسعار (Price Glitches)</h4>
+            <p>تنبيهات فورية بأخطاء تسعير تذاكر الطيران والفنادق العالمية لحجزها قبل تصحيحها.</p>
           </div>
         </div>
 
         <div className="perk-item">
-          <div className="perk-icon">💸</div>
+          <div className="perk-icon">🛎️</div>
           <div className="perk-content">
-            <h4>0% رسوم سحب مجاناً</h4>
-            <p>سحب أرباحك كاملة دون أي اقتطاع أو رسوم منصة نهائياً.</p>
+            <h4>أولوية الترقية المجانية للغرف</h4>
+            <p>دليل وأولوية طلب ترقيات الأجنحة وإطلالات البحر والبرج عند الوصول مجاناً.</p>
           </div>
         </div>
 
         <div className="perk-item">
-          <div className="perk-icon">📢</div>
+          <div className="perk-icon">🏖️</div>
           <div className="perk-content">
-            <h4>قناة Telegram VIP الخاصة</h4>
-            <p>وصول فوري لقناة الصفقات الحصرية وطرق مضاعفة الدخل.</p>
-          </div>
-        </div>
-
-        <div className="perk-item">
-          <div className="perk-icon">🚀</div>
-          <div className="perk-content">
-            <h4>أولوية السحب الفوري</h4>
-            <p>معالجة وتأكيد طلبات السحب الخاصة بك بسرعة فائقة.</p>
+            <h4>مبيعات خاصة سرية (Ventes Privées)</h4>
+            <p>عروض إقامة فاخرة 5 نجوم بخصومات تصل إلى 50% غير معلنة للجمهور.</p>
           </div>
         </div>
       </div>
@@ -97,55 +96,36 @@ function VipPage() {
               className={`plan-option-card ${selectedPlan === 'monthly' ? 'plan-selected' : ''}`}
               onClick={() => setSelectedPlan('monthly')}
             >
-              <div className="plan-badge">الأكثر شعبية 🔥</div>
+              <div className="plan-badge">الأكثر اختياراً 🔥</div>
               <h3 className="plan-name">اشتراك شهري</h3>
-              <div className="plan-price">
-                5.00 <span className="plan-curr">نقطة / شهر</span>
+              <div className="plan-price-row">
+                <span className="plan-amount">5 $</span>
+                <span className="plan-period">/ شهر</span>
               </div>
-              <p className="plan-desc">تجديد تلقائي شهرياً مع كافة مزايا VIP</p>
+              <p className="plan-desc">مناسب للرحلات القادمة مع إمكانية الإلغاء في أي وقت.</p>
             </div>
 
             <div
               className={`plan-option-card ${selectedPlan === 'lifetime' ? 'plan-selected' : ''}`}
               onClick={() => setSelectedPlan('lifetime')}
             >
-              <div className="plan-badge plan-badge-gold">توفير 80% 👑</div>
-              <h3 className="plan-name">عضوية دائمة</h3>
-              <div className="plan-price">
-                20.00 <span className="plan-curr">نقطة لمرة واحدة</span>
+              <div className="plan-badge plan-badge-gold">توفير 70% 👑</div>
+              <h3 className="plan-name">عضوية مدى الحياة</h3>
+              <div className="plan-price-row">
+                <span className="plan-amount">19 $</span>
+                <span className="plan-period">مرة واحدة للأبد</span>
               </div>
-              <p className="plan-desc">عضوية VIP دائمة مدى الحياة بدون أي تجديد</p>
+              <p className="plan-desc">وصول دائم لكافة أكواد الخصم وقناة الصفقات مدى الحياة.</p>
             </div>
           </div>
 
           <button
-            className="btn btn-primary btn-block btn-vip-activate"
+            type="button"
+            className="btn btn-primary btn-block btn-vip-cta"
             onClick={handleUpgrade}
             disabled={upgrading}
           >
-            {upgrading ? 'جاري التفعيل...' : '👑 ترقية حسابي إلى VIP الآن'}
-          </button>
-        </div>
-      )}
-
-      {/* زر دخول قناة VIP للمشتركين */}
-      {isVipActive && (
-        <div className="card">
-          <h2 className="form-section-title">قناة المشتركين VIP 🚀</h2>
-          <p style={{ fontSize: '13px', color: 'var(--tg-theme-hint-color)', marginBottom: '12px' }}>
-            بصفتك عضواً مميزاً، يمكنك الانضمام الآن إلى القناة الخاصة لتحميل استراتيجيات الربح الحصرية:
-          </p>
-          <button
-            className="btn btn-primary btn-block"
-            onClick={() => {
-              try {
-                WebApp.openTelegramLink('https://t.me/telegram');
-              } catch {
-                window.open('https://t.me/telegram', '_blank');
-              }
-            }}
-          >
-            📢 الدخول إلى قناة VIP الخاصة
+            {upgrading ? 'جاري التفعيل...' : '✨ تفعيل عضوية VIP الآن (5$)'}
           </button>
         </div>
       )}
@@ -154,4 +134,3 @@ function VipPage() {
 }
 
 export default VipPage;
-

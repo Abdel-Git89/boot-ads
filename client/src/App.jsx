@@ -3,12 +3,9 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import WebApp from '@twa-dev/sdk';
 import Navigation from './components/Navigation';
-import TasksPage from './pages/TasksPage';
-import AdvertiserPage from './pages/AdvertiserPage';
-import WalletPage from './pages/WalletPage';
-import FriendsPage from './pages/FriendsPage';
-import VipPage from './pages/VipPage';
 import HotelSearchPage from './pages/HotelSearchPage';
+import VipPage from './pages/VipPage';
+import FavoritesPage from './pages/FavoritesPage';
 
 // سياق التطبيق لمشاركة بيانات المستخدم وAPI
 export const AppContext = createContext(null);
@@ -33,9 +30,13 @@ api.interceptors.request.use((config) => {
 });
 
 function App() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // تهيئة مستخدم افتراضي سريع لعدم حظر واجهة المستخدم أبداً (0 ثانية تحميل)
+  const [user, setUser] = useState({
+    firstName: WebApp.initDataUnsafe?.user?.first_name || 'مسافر',
+    username: WebApp.initDataUnsafe?.user?.username || 'traveler',
+    role: 'user',
+    isVip: false,
+  });
   const [toast, setToast] = useState(null);
 
   // عرض إشعار مؤقت
@@ -44,50 +45,29 @@ function App() {
     setTimeout(() => setToast(null), 3000);
   }, []);
 
-  // جلب بيانات المستخدم من الخادم
+  // جلب بيانات المستخدم في الخلفية دون تعطيل الواجهة
   const fetchUser = useCallback(async () => {
     try {
       const res = await api.get('/api/users/me');
-      setUser(res.data);
-    } catch (err) {
-      console.error('فشل جلب بيانات المستخدم:', err);
-      setError('فشل الاتصال بالخادم');
-    } finally {
-      setLoading(false);
+      if (res.data) {
+        setUser(res.data);
+      }
+    } catch {
+      // تجاهل الخطأ في حالة عدم وجود جلسة، فصفحات الفنادق تعمل بشكل كامل بدون مصادقة
     }
   }, []);
 
   useEffect(() => {
-    // إخبار تيليجرام بأن التطبيق جاهز
-    WebApp.ready();
-    WebApp.expand();
+    try {
+      WebApp.ready();
+      WebApp.expand();
+    } catch (e) {
+      console.warn('Telegram SDK ready warning:', e);
+    }
 
-    // جلب بيانات المستخدم عند التحميل
+    // جلب بيانات الحساب في الخلفية
     fetchUser();
   }, [fetchUser]);
-
-  // شاشة التحميل
-  if (loading) {
-    return (
-      <div className="loading-screen">
-        <div className="spinner"></div>
-        <p>جاري التحميل...</p>
-      </div>
-    );
-  }
-
-  // شاشة الخطأ
-  if (error) {
-    return (
-      <div className="error-screen">
-        <span className="error-icon">⚠️</span>
-        <p>{error}</p>
-        <button className="btn btn-primary" onClick={() => { setError(null); setLoading(true); fetchUser(); }}>
-          إعادة المحاولة
-        </button>
-      </div>
-    );
-  }
 
   return (
     <AppContext.Provider value={{ user, setUser, api, showToast, fetchUser }}>
@@ -99,15 +79,12 @@ function App() {
           </div>
         )}
 
-        {/* محتوى الصفحات */}
+        {/* محتوى الصفحات المخصصة للفنادق والسفر */}
         <div className="content">
           <Routes>
             <Route path="/" element={<HotelSearchPage />} />
-            <Route path="/tasks" element={<TasksPage />} />
             <Route path="/vip" element={<VipPage />} />
-            <Route path="/friends" element={<FriendsPage />} />
-            <Route path="/advertiser" element={<AdvertiserPage />} />
-            <Route path="/wallet" element={<WalletPage />} />
+            <Route path="/favorites" element={<FavoritesPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>

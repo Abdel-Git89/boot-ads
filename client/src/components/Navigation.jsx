@@ -1,33 +1,22 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { AppContext } from '../App';
 import './Navigation.css';
 
 /**
- * شريط التنقل السفلي
- * يعرض ثلاثة تبويبات: المهام، المعلن، المحفظة
+ * شريط التنقل السفلي المخصص لخدمات الفنادق والسفر حصراً
  */
 function Navigation() {
-  const { user } = useContext(AppContext);
   const location = useLocation();
 
   const tabs = [
     { path: '/', label: 'فنادق وعروض', icon: '🏨' },
-    { path: '/tasks', label: 'المهام', icon: '📋' },
-    { path: '/vip', label: 'VIP', icon: '👑' },
-    { path: '/friends', label: 'الأصدقاء', icon: '👥' },
-    { path: '/advertiser', label: 'المعلن', icon: '📢' },
-    { path: '/wallet', label: 'المحفظة', icon: '💰' },
+    { path: '/vip', label: 'Club VIP', icon: '👑' },
+    { path: '/favorites', label: 'المفضلة', icon: '❤️' },
   ];
 
   return (
     <nav className="bottom-nav">
       {tabs.map((tab) => {
-        // إخفاء تبويب المعلن إذا لم يكن المستخدم معلناً أو مشرفاً
-        if (tab.path === '/advertiser' && user?.role !== 'advertiser' && user?.role !== 'admin') {
-          return null;
-        }
-
         const isActive = location.pathname === tab.path;
 
         return (
