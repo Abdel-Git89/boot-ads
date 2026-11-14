@@ -24,11 +24,16 @@ router.get('/', async (req, res) => {
     const completedAds = await Completion.find({ userId: req.user._id }).select('adId');
     const completedAdIds = completedAds.map((c) => c.adId.toString());
 
-    // إضافة حقل isCompleted لكل إعلان
-    const adsWithStatus = ads.map((ad) => ({
-      ...ad.toObject(),
-      isCompleted: completedAdIds.includes(ad._id.toString()),
-    }));
+    // إضافة حقل isCompleted وعرض المكافأة الصافية بعد عمولة المنصة (20%)
+    const adsWithStatus = ads.map((ad) => {
+      const netReward = Number((ad.rewardPerUser * 0.80).toFixed(2));
+      return {
+        ...ad.toObject(),
+        rewardPerUser: netReward > 0 ? netReward : ad.rewardPerUser,
+        originalReward: ad.rewardPerUser,
+        isCompleted: completedAdIds.includes(ad._id.toString()),
+      };
+    });
 
     res.json(adsWithStatus);
   } catch (error) {
@@ -166,14 +171,48 @@ router.post('/:id/complete', async (req, res) => {
       { session }
     );
 
-    // زيادة رصيد المستخدم بمقدار المكافأة
+    // حساب مكافأة المستخدم بعد عمولة المنصة 20%
+    const PLATFORM_FEE_RATE = 0.20;
+    const REFERRAL_FEE_RATE = 0.05;
+    const netReward = Number((ad.rewardPerUser * (1 - PLATFORM_FEE_RATE)).toFixed(2));
+    const finalReward = netReward > 0 ? netReward : ad.rewardPerUser;
+
+    // زيادة رصيد المستخدم بمقدار المكافأة الصافية
     await User.findByIdAndUpdate(
       req.user._id,
-      { $inc: { balance: ad.rewardPerUser } },
+      { $inc: { balance: finalReward } },
       { session }
     );
 
-    // خصم المكافأة من الميزانية المتبقية للإعلان
+    // إذا كان المستخدم مُحالاً، منح عمولة سلبية للمُحيل (5%)
+    if (req.user.referredBy) {
+      const refBonus = Number((ad.rewardPerUser * REFERRAL_FEE_RATE).toFixed(2));
+      if (refBonus > 0) {
+        await User.findByIdAndUpdate(
+          req.user.referredBy,
+          {
+            $inc: {
+              balance: refBonus,
+              referralEarnings: refBonus,
+            },
+          },
+          { session }
+        );
+        await Transaction.create(
+          [
+            {
+              userId: req.user.referredBy,
+              amount: refBonus,
+              type: 'reward',
+              status: 'completed',
+            },
+          ],
+          { session }
+        );
+      }
+    }
+
+    // خصم التكلفة الكاملة من الميزانية المتبقية للإعلان
     const newRemainingBudget = ad.remainingBudget - ad.rewardPerUser;
     const updateFields = {
       $inc: { remainingBudget: -ad.rewardPerUser },
@@ -186,12 +225,12 @@ router.post('/:id/complete', async (req, res) => {
 
     await Ad.findByIdAndUpdate(adId, updateFields, { session });
 
-    // تسجيل معاملة المكافأة
+    // تسجيل معاملة المكافأة للمستخدم
     await Transaction.create(
       [
         {
           userId: req.user._id,
-          amount: ad.rewardPerUser,
+          amount: finalReward,
           type: 'reward',
           status: 'completed',
         },
@@ -204,7 +243,7 @@ router.post('/:id/complete', async (req, res) => {
 
     res.json({
       message: 'تم إكمال المهمة بنجاح',
-      reward: ad.rewardPerUser,
+      reward: finalReward,
     });
   } catch (error) {
     await session.abortTransaction();

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
+import WebApp from '@twa-dev/sdk';
 import { AppContext } from '../App';
 import './WalletPage.css';
 
@@ -67,6 +68,25 @@ function WalletPage() {
 
     setSubmitting(true);
     try {
+      // شحن الرصيد المباشر عبر نجوم تيليجرام (Telegram Stars)
+      if (depositForm.gateway === 'stars') {
+        const res = await api.post('/api/wallet/stars-invoice', { amount });
+        if (res.data?.invoiceLink) {
+          try {
+            WebApp.openInvoice(res.data.invoiceLink, (status) => {
+              if (status === 'paid') {
+                showToast('تم شحن الرصيد بنجاح عبر نجوم تيليجرام! ⭐', 'success');
+                fetchWallet();
+                fetchUser();
+              }
+            });
+          } catch {
+            window.open(res.data.invoiceLink, '_blank');
+          }
+          return;
+        }
+      }
+
       await api.post('/api/wallet/deposit', {
         amount,
         gateway: depositForm.gateway,
@@ -76,7 +96,7 @@ function WalletPage() {
       await Promise.all([fetchWallet(), fetchUser()]);
       setActiveTab('history');
     } catch (err) {
-      const msg = err.response?.data?.message || 'فشل الإيداع';
+      const msg = err.response?.data?.error || err.response?.data?.message || 'فشل الإيداع';
       showToast(msg, 'error');
     } finally {
       setSubmitting(false);
@@ -92,6 +112,11 @@ function WalletPage() {
       return;
     }
 
+    if (amount < 2) {
+      showToast('الحد الأدنى للسحب هو 2.00 نقطة', 'error');
+      return;
+    }
+
     if (amount > (user?.balance || 0)) {
       showToast('الرصيد غير كافٍ', 'error');
       return;
@@ -99,16 +124,17 @@ function WalletPage() {
 
     setSubmitting(true);
     try {
-      await api.post('/api/wallet/withdraw', {
+      const res = await api.post('/api/wallet/withdraw', {
         amount,
         gateway: withdrawForm.gateway,
       });
-      showToast('تم تقديم طلب السحب بنجاح ✅', 'success');
+      const feeMsg = res.data?.fee ? ` (رسوم المنصة: ${res.data.fee})` : '';
+      showToast(`تم تقديم طلب السحب بنجاح ✅${feeMsg}`, 'success');
       setWithdrawForm({ amount: '', gateway: 'paypal' });
       await Promise.all([fetchWallet(), fetchUser()]);
       setActiveTab('history');
     } catch (err) {
-      const msg = err.response?.data?.message || 'فشل السحب';
+      const msg = err.response?.data?.error || err.response?.data?.message || 'فشل السحب';
       showToast(msg, 'error');
     } finally {
       setSubmitting(false);

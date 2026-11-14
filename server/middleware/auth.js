@@ -71,22 +71,52 @@ const authMiddleware = async (req, res, next) => {
 
     const telegramUser = JSON.parse(decodeURIComponent(userParam));
 
-    // البحث عن المستخدم في قاعدة البيانات أو إنشاء مستخدم جديد
-    const user = await User.findOneAndUpdate(
-      { telegramId: String(telegramUser.id) },
-      {
-        $setOnInsert: {
-          telegramId: String(telegramUser.id),
-          balance: 0,
-          role: 'user',
-        },
-        $set: {
-          username: telegramUser.username || '',
-          firstName: telegramUser.first_name || '',
-        },
-      },
-      { upsert: true, new: true }
-    );
+    // البحث عن المستخدم أو إنشاؤه مع دعم نظام الإحالة (Referral)
+    let user = await User.findOne({ telegramId: String(telegramUser.id) });
+
+    if (!user) {
+      let referredBy = null;
+      const startParam = params.get('start_param');
+      if (startParam && startParam.startsWith('ref_')) {
+        const refTelegramId = startParam.replace('ref_', '').trim();
+        if (refTelegramId && refTelegramId !== String(telegramUser.id)) {
+          const referrer = await User.findOne({ telegramId: refTelegramId });
+          if (referrer) {
+            referredBy = referrer._id;
+            // مكافأة الإحالة الترحيبية
+            const REFERRAL_SIGNUP_BONUS = 1.0;
+            referrer.balance += REFERRAL_SIGNUP_BONUS;
+            referrer.referralCount = (referrer.referralCount || 0) + 1;
+            referrer.referralEarnings = (referrer.referralEarnings || 0) + REFERRAL_SIGNUP_BONUS;
+            await referrer.save();
+
+            // تسجيل المعاملة
+            try {
+              const Transaction = require('../models/Transaction');
+              await Transaction.create({
+                userId: referrer._id,
+                amount: REFERRAL_SIGNUP_BONUS,
+                type: 'reward',
+                status: 'completed',
+              });
+            } catch (txErr) {}
+          }
+        }
+      }
+
+      user = await User.create({
+        telegramId: String(telegramUser.id),
+        username: telegramUser.username || '',
+        firstName: telegramUser.first_name || '',
+        balance: 0,
+        role: 'user',
+        referredBy,
+      });
+    } else {
+      user.username = telegramUser.username || user.username;
+      user.firstName = telegramUser.first_name || user.firstName;
+      await user.save();
+    }
 
     // إرفاق المستخدم بالطلب لاستخدامه في المسارات
     req.user = user;

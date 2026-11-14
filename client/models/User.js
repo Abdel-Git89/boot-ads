@@ -29,6 +29,22 @@ const userSchema = new mongoose.Schema(
       enum: ['user', 'advertiser', 'admin'],
       default: 'user',
     },
+    // نظام الإحالة / Parrainage
+    referredBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
+    // عدد الأصدقاء المُحالين
+    referralCount: {
+      type: Number,
+      default: 0,
+    },
+    // إجمالي أرباح الإحالة
+    referralEarnings: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );
